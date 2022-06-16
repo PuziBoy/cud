@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import { Button, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {decode as atob, encode as btoa} from 'base-64'
 
 
 function Todo({ todo, index, markTodo, removeTodo }) {
@@ -21,9 +22,27 @@ function Todo({ todo, index, markTodo, removeTodo }) {
 
 function FormTodo({ addTodo }) {
   const [value, setValue] = React.useState("");
+  const [title, setTitle] = React.useState("");
 
-  const handleSubmit = e => {
+  let user_data = {
+      title: title,
+  };
+
+  const options = {
+    method: 'post',
+    credentials: 'include',
+    headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Authorization': 'Basic '+btoa('admin:root'),
+        'Content-Type': 'application/json'
+       
+    },
+    body: JSON.stringify(user_data)
+}
+
+let handleSubmit = async (e) => {
     e.preventDefault();
+    fetch("http://localhost:5984/cud", options);
     if (!value) return;
     addTodo(value);
     setValue("");
@@ -33,7 +52,7 @@ function FormTodo({ addTodo }) {
     <Form onSubmit={handleSubmit}> 
     <Form.Group>
       <Form.Label><b>Add Todo</b></Form.Label>
-      <Form.Control type="text" className="input" value={value} onChange={e => setValue(e.target.value)} placeholder="Add new todo" />
+      <Form.Control type="text" className="input" value={title} onChange={e => setTitle(e.target.value)} onInput={e => setValue(e.target.value)} placeholder="Add new todo" />
     </Form.Group>
     <Button variant="primary mb-3" type="submit">
       Submit
@@ -45,9 +64,32 @@ function FormTodo({ addTodo }) {
 }
 
 function App() {
+  const [title, setTitle] = React.useState("");
+
+  let user_data = {
+      title: title,
+  };
+
+  const options = {
+    method: 'get',
+    credentials: 'include',
+    headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Authorization': 'Basic '+btoa('admin:root'),
+        'Content-Type': 'application/json'
+       
+    },
+    body: JSON.stringify(user_data)
+}
+
+let handleSubmit = async (e) => {
+    e.preventDefault();
+    fetch("http://localhost:5984/cud/_all_docs", options);
+  };
+
   const [todos, setTodos] = React.useState([
     {
-      text: "This is a sampe todo",
+      text: title,
       isDone: false
     }
   ]);
@@ -73,7 +115,7 @@ function App() {
     <div className="app">
       <div className="container">
         <h1 className="text-center mb-4">Todo List</h1>
-        <FormTodo addTodo={addTodo} />
+        <FormTodo addTodo={addTodo}/>
         <div>
           {todos.map((todo, index) => (
             <Card>
