@@ -8,3 +8,5 @@ services:
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=root
+    volumes:
+      - ./dbdata:/opt/couchdb/data

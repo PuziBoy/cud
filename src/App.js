@@ -42,6 +42,7 @@ function FormTodo({ addTodo }) {
   }
 
   let handleSubmit = async (e) => {
+    document.location.reload(true);
     e.preventDefault();
     fetch("http://localhost:5984/cud", options);
     if (!value) return;
@@ -75,10 +76,21 @@ function App() {
       'Content-Type': 'application/json'
 
     }
+    
+  }
+  const options1 = {
+    method: 'delete',
+    credentials: 'include',
+    headers: {
+      'Accept': 'application/json, text/plain, */*',
+      'Authorization': 'Basic ' + btoa('admin:root'),
+      'Content-Type': 'application/json'
+
+    }
   }
   const [todos, setTodos] = React.useState([
     {
-      text: "Homework",
+      text: "I'm here to remind you that you have a tasks!",
       isDone: false
     }
   ]);  
@@ -111,7 +123,25 @@ function App() {
     const newTodos = [...todos];
     newTodos.splice(index, 1);
     setTodos(newTodos);
-    fetch("http://localhost:5984/cud/" + [todos], { method: 'delete' }, options)
+    fetch("http://localhost:5984/cud/_all_docs?include_docs=true", options)
+    .then(response => response.json())
+    .then((data) => {
+      const array = [];
+      const arrray = [];
+      for(const value of Object.values(data.rows)){
+        array.push(value.doc._id);
+        arrray.push(value.doc._rev);
+          for(const key of Object.keys(data.rows)){
+            if (key == index-1) {
+             console.log(array[key]);
+             console.log(arrray[key]);
+             fetch("http://localhost:5984/cud/" + array[key] + "?rev=" + arrray[key], options1)
+            }
+          }
+      }
+        //array.push({text: value.doc.title, isDone: false});
+      //fetch("http://localhost:5984/cud/" + index, {method : "delete"}, options)
+      });
   };
 
   return (
